@@ -1,0 +1,11 @@
+# 依赖
+/node_modules
+
+# 构建产物（部署由 deploy.bat 拷入 pix_backend embed）
+/dist
+
+# 增量构建缓存
+tsconfig.tsbuildinfo
+
+# 日志
+*.log
