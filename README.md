@@ -2,6 +2,13 @@
 
 ArkPix（Pixiv 第三方客户端）的 Web 前端。浏览器不能直连 Pixiv，一切 API/图片请求都经自托管中继后端 [pixiv-relay](https://github.com/cqash/pixiv-relay)（Go）转发；生产形态下本前端的构建产物 embed 进后端二进制，由后端同源托管。
 
+## 相关项目
+
+| 仓库 | 说明 |
+| --- | --- |
+| [ArkPix](https://github.com/cqash/ArkPix) | HarmonyOS 客户端（ArkTS / ArkUI） |
+| [pixiv-relay](https://github.com/cqash/pixiv-relay) | 自托管中继服务端（Go），本前端的运行依赖 |
+
 ## 技术栈
 
 Vue 3 + Vite + TypeScript + Pinia + Vue Router，无 UI 组件库（手写样式 + CSS 变量主题）。
