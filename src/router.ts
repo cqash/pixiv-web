@@ -3,6 +3,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useRelayAuthStore } from './stores/relayAuth'
 import { usePixivAuthStore } from './stores/pixivAuth'
+import { getAdminToken } from './api/admin'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -59,10 +60,52 @@ export const router = createRouter({
       name: 'history',
       component: () => import('./views/HistoryView.vue'),
     },
+    // 管理端：独立于客户端双 token 体系，只验 admin token
+    {
+      path: '/admin/login',
+      name: 'admin-login',
+      component: () => import('./views/admin/AdminLoginView.vue'),
+    },
+    {
+      path: '/admin',
+      component: () => import('./views/admin/AdminLayout.vue'),
+      children: [
+        { path: '', redirect: '/admin/overview' },
+        {
+          path: 'overview',
+          name: 'admin-overview',
+          component: () => import('./views/admin/AdminOverviewView.vue'),
+        },
+        {
+          path: 'cache',
+          name: 'admin-cache',
+          component: () => import('./views/admin/AdminCacheView.vue'),
+        },
+        {
+          path: 'accounts',
+          name: 'admin-accounts',
+          component: () => import('./views/admin/AdminAccountsView.vue'),
+        },
+        {
+          path: 'settings',
+          name: 'admin-settings',
+          component: () => import('./views/admin/AdminSettingsView.vue'),
+        },
+      ],
+    },
   ],
 })
 
 router.beforeEach((to) => {
+  // /admin 前缀：只验 admin token，绕开 relay+pixiv 双登录守卫
+  if (to.path.startsWith('/admin')) {
+    if (to.name === 'admin-login') {
+      if (getAdminToken()) return { path: '/admin' }
+      return true
+    }
+    if (!getAdminToken()) return { name: 'admin-login' }
+    return true
+  }
   const relay = useRelayAuthStore()
   const pixiv = usePixivAuthStore()
   if (to.name === 'login') {

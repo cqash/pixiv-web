@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // 历史记录页：浏览历史（网格 + 导出/清空）/ 搜索历史（关键词列表 + 清空）
+// 条目均为真实 <a> 链接（RouterLink）：支持中键/Ctrl+点击/右键新标签页打开（同 IllustCard）
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHistoryStore } from '../stores/history'
@@ -11,14 +12,6 @@ const router = useRouter()
 const historyStore = useHistoryStore()
 
 const activeTab = ref<'browse' | 'search'>('browse')
-
-function openIllust(illustId: number) {
-  router.push({ name: 'illust-detail', params: { id: illustId } })
-}
-
-function openSearch(keyword: string) {
-  router.push({ name: 'search', query: { word: keyword } })
-}
 
 // ---- 导出 ----
 function downloadFile(filename: string, content: string, mime: string) {
@@ -119,11 +112,11 @@ function clearSearch() {
     <template v-if="activeTab === 'browse'">
       <EmptyView v-if="historyStore.browse.length === 0" text="暂无浏览历史" />
       <div v-else class="grid">
-        <div
+        <RouterLink
           v-for="item in historyStore.browse"
           :key="item.illustId"
+          :to="{ name: 'illust-detail', params: { id: item.illustId } }"
           class="cell"
-          @click="openIllust(item.illustId)"
         >
           <div class="thumb">
             <CachedImage :src="item.imageUrl" :ratio="1" :alt="item.title" />
@@ -131,7 +124,7 @@ function clearSearch() {
           <p class="cell-title">{{ item.title }}</p>
           <p class="cell-meta">{{ item.userName }}</p>
           <p class="cell-meta">{{ formatCreateDate(new Date(item.timestamp).toISOString()) }}</p>
-        </div>
+        </RouterLink>
       </div>
     </template>
 
@@ -139,15 +132,15 @@ function clearSearch() {
     <template v-else>
       <EmptyView v-if="historyStore.search.length === 0" text="暂无搜索历史" />
       <div v-else class="search-list">
-        <button
+        <RouterLink
           v-for="item in historyStore.search"
           :key="`${item.searchType}:${item.keyword}`"
+          :to="{ name: 'search', query: { word: item.keyword } }"
           class="search-item"
-          @click="openSearch(item.keyword)"
         >
           <span class="keyword">{{ item.keyword }}</span>
           <span class="search-time">{{ formatCreateDate(new Date(item.timestamp).toISOString()) }}</span>
-        </button>
+        </RouterLink>
       </div>
     </template>
   </div>
@@ -205,12 +198,15 @@ function clearSearch() {
   gap: 12px;
 }
 .cell {
+  display: block;
   background: var(--bg-card);
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
   cursor: pointer;
   padding-bottom: 8px;
+  color: inherit;
+  text-decoration: none;
 }
 .cell-title {
   margin: 8px 8px 0;
@@ -243,6 +239,8 @@ function clearSearch() {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   text-align: left;
+  text-decoration: none;
+  cursor: pointer;
 }
 .keyword {
   font-size: 14px;

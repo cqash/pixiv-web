@@ -25,12 +25,13 @@ src/
   services/    # syncService.ts（四域数据同步：settings/mute/history/search_history，LWW + 墓碑）
   components/  # CachedImage、IllustCard、IllustWaterfall、ImageViewer、CommonViews
   views/       # 登录 / 首页 Tabs（推荐·关注·排行·搜索）/ 详情 / 用户主页 / 评论 / 历史 / 设置
+               # + admin/（/admin 服务端管理区：登录、概览、缓存、账号、设置）
   utils/       # base64、日期格式化、画质选档、屏蔽过滤
 ```
 
 ## 与后端的关系
 
-- **开发**：`vite.config.ts` 把 `/auth /relay /img /sync /recover /healthz` 代理到 `localhost:8080`。
+- **开发**：`vite.config.ts` 把 `/auth /relay /img /sync /recover /healthz /admin` 代理到 `localhost:8080`。
 - **生产**：`deploy.bat` 把 `dist/` 拷入 `pix_backend/internal/web/dist/`，后端 `go:embed` 托管，同源无 CORS。
 - **双 token 体系**：中继账号 token（`/auth/v1/register`，access+refresh 轮换制）管"能不能用中继"；Pixiv token（refresh_token 导入登录）管"能不能取 Pixiv 数据"，两者独立存储、各自单飞刷新。
 - **Pixiv 登录**：粘贴 refresh_token（与鸿蒙端「导出 Token」的 JSON 兼容，支持整段粘贴自动提取）。
