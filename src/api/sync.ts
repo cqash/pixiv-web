@@ -1,5 +1,5 @@
 // /sync/v1 同步协议封装：分批 push / hasMore 续页 pull / 敏感字段剔除 / 每域游标持久化
-// 协议权威：ArkPix/docs\backend-design.md §7；结构对齐鸿蒙端 SyncService.ets
+// 协议权威：ArkPix 客户端仓库 docs/backend-design.md §7；结构对齐鸿蒙端 SyncService.ets
 
 import { authorizedGetJson, authorizedPostJson } from './relay'
 import { ApiError } from './relayAuthApi'

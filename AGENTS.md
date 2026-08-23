@@ -1,15 +1,15 @@
 # AGENTS.md — ArkPix Web
 
-ArkPix 的 Web 前端（Vue 3 + Vite + TS + Pinia + Vue Router）。Pixiv 第三方客户端，**禁止浏览器直连 pixiv 域名**，API/图片全部经自托管中继后端 `pixiv-relay`（Go）。
+ArkPix 的 Web 前端（Vue 3 + Vite + TS + Pinia + Vue Router）。Pixiv 第三方客户端，**禁止浏览器直连 pixiv 域名**，API/图片全部经自托管中继后端 [pixiv-relay](https://github.com/cqash/pixiv-relay)（Go）。
 
-**协议契约**：`ArkPix/docs\backend-design.md` 是唯一权威，端点/错误格式/同步语义改动以它为准（§7 为同步域）。跨端同步结构与鸿蒙端 `ArkPix/entry\src\main\ets\services\SyncService.ets` 对齐（两端同步同一账号的数据）。
+**协议契约**：`ArkPix 客户端仓库 docs/backend-design.md` 是唯一权威，端点/错误格式/同步语义改动以它为准（§7 为同步域）。跨端同步结构与鸿蒙端 `ArkPix 客户端 SyncService.ets` 对齐（两端同步同一账号的数据）。
 
 ## 构建与测试
 
 - `npm install` / `npm run dev`（5173，vite proxy 转发 API 到 localhost:8080，同源免 CORS）
 - `npm run build` = `vue-tsc -b && vite build`（类型检查 + 构建，提交前必须过）
 - 无单元测试框架；验证手段 = vue-tsc 零错误 + vite build 成功 + dev 下手动/curl 联调
-- 部署：`deploy.bat`（build 后清并拷贝 `dist/*` → `..\pix_backend\internal\web\dist\`，后端 go:embed 托管）
+- 部署：`deploy.bat`（build 后清并拷贝 `dist/*` → `..\pixiv-relay\internal\web\dist\`，后端 go:embed 托管）
 
 ## 结构
 
@@ -40,5 +40,5 @@ src/views/     LoginView、HomeView（Tabs）、home/（推荐·关注·排行·
 
 ## 部署约定
 
-- 生产形态 = 后端 embed 托管：本仓库不出 docker/CI，构建产物由 `deploy.bat` 送入 pix_backend 后随其后端二进制/镜像分发。
+- 生产形态 = 后端 embed 托管：本仓库不出 docker/CI，构建产物由 `deploy.bat` 送入 pixiv-relay 后随其后端二进制/镜像分发。
 - 同源部署时 `serverUrl` 为空串（relayAuth.normalizeServerUrl），所有 API 路径相对当前源。

@@ -29,7 +29,7 @@ function exportJson() {
   if (items.length === 0) return
   const data = {
     version: 1,
-    appName: 'arkpix-web',
+    appName: 'pixiv-web',
     type: 'history',
     exportedAt: new Date().toISOString(),
     count: items.length,

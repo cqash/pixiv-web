@@ -1,7 +1,7 @@
 # 依赖
 /node_modules
 
-# 构建产物（部署由 deploy.bat 拷入 pix_backend embed）
+# 构建产物（部署由 deploy.bat 拷入 pixiv-relay embed）
 /dist
 
 # 增量构建缓存
