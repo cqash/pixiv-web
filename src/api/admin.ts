@@ -48,9 +48,9 @@ async function adminSendJson<T>(method: string, path: string, body?: unknown): P
 
 // ---- 类型（字段名以后端 internal/admin 为准）----
 
-/** 单个可热改设置项：生效值 + 来源 */
+/** 单个可热改设置项：生效值 + 来源。数值键为 number；invite_codes 为规范化 CSV 字符串（空 = 开放注册） */
 export interface SettingInfo {
-  value: number
+  value: number | string
   source: 'db' | 'env' | 'default'
 }
 
@@ -107,8 +107,8 @@ export const getOverview = () => adminGetJson<AdminOverview>('/admin/v1/overview
 export const getSettings = () =>
   adminGetJson<{ settings: AdminSettings }>('/admin/v1/settings')
 
-/** PATCH 部分键值（数字）；全部校验通过才生效，未知键/非法值 400 */
-export const patchSettings = (patch: Record<string, number>) =>
+/** PATCH 部分键值（数值键为 number，invite_codes 为 CSV 字符串）；全部校验通过才生效，未知键/非法值 400 */
+export const patchSettings = (patch: Record<string, number | string>) =>
   adminSendJson<{ settings: AdminSettings }>('PATCH', '/admin/v1/settings', patch)
 
 export const getCacheStats = () => adminGetJson<CacheStats>('/admin/v1/cache/stats')

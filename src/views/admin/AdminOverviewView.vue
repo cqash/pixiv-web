@@ -14,6 +14,7 @@ const settingLabels: Record<string, string> = {
   recover_negative_ttl_days: '恢复负缓存 TTL（天）',
   rate_write_per_min: '写接口限流（次/分）',
   rate_img_per_min: '图片接口限流（次/分）',
+  invite_codes: '注册邀请码',
 }
 
 const sourceLabels: Record<string, string> = {
@@ -22,8 +23,9 @@ const sourceLabels: Record<string, string> = {
   default: '默认值',
 }
 
-function settingDisplay(key: string, value: number): string {
-  if (key === 'cache_max_bytes') return `${formatBytes(value)}（${value}）`
+function settingDisplay(key: string, value: number | string): string {
+  if (key === 'cache_max_bytes') return `${formatBytes(Number(value))}（${value}）`
+  if (key === 'invite_codes' && value === '') return '（空 = 开放注册）'
   return String(value)
 }
 

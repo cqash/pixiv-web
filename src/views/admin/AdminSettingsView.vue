@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 运行时设置热改：恢复缓存 TTL / 接口限流（缓存两项在「缓存」页编辑）
+// 运行时设置热改：恢复缓存 TTL / 接口限流 / 注册邀请码（缓存两项在「缓存」页编辑）
 import { onMounted, ref } from 'vue'
 import { getSettings, patchSettings, type AdminSettings } from '../../api/admin'
 
@@ -7,17 +7,26 @@ interface Field {
   key: string
   label: string
   hint: string
+  /** number：正整数输入；text：自由文本（如 CSV 邀请码列表） */
+  type: 'number' | 'text'
 }
 
 const fields: Field[] = [
-  { key: 'recover_ttl_days', label: '恢复缓存 TTL（天）', hint: '已删除作品页面/元数据缓存保留天数' },
+  { key: 'recover_ttl_days', label: '恢复缓存 TTL（天）', hint: '已删除作品页面/元数据缓存保留天数', type: 'number' },
   {
     key: 'recover_negative_ttl_days',
     label: '恢复负缓存 TTL（天）',
     hint: '「作品不存在」结论的缓存天数',
+    type: 'number',
   },
-  { key: 'rate_write_per_min', label: '写接口限流（次/分）', hint: '每账号写类端点速率' },
-  { key: 'rate_img_per_min', label: '图片接口限流（次/分）', hint: '每 IP 图片代理端点速率' },
+  { key: 'rate_write_per_min', label: '写接口限流（次/分）', hint: '每账号写类端点速率', type: 'number' },
+  { key: 'rate_img_per_min', label: '图片接口限流（次/分）', hint: '每 IP 图片代理端点速率', type: 'number' },
+  {
+    key: 'invite_codes',
+    label: '注册邀请码',
+    hint: '逗号或换行分隔，保存时去重规范化；留空 = 开放注册（公网部署慎用）',
+    type: 'text',
+  },
 ]
 
 const settings = ref<AdminSettings | null>(null)
@@ -59,14 +68,23 @@ onMounted(async () => {
 
 async function save() {
   if (saving.value) return
-  const patch: Record<string, number> = {}
+  const patch: Record<string, number | string> = {}
   for (const f of fields) {
-    const v = Number(inputs.value[f.key])
-    if (!Number.isInteger(v) || v <= 0) {
-      showToast(`「${f.label}」必须是正整数`)
-      return
+    const raw = inputs.value[f.key] ?? ''
+    if (f.type === 'number') {
+      const v = Number(raw)
+      if (!Number.isInteger(v) || v <= 0) {
+        showToast(`「${f.label}」必须是正整数`)
+        return
+      }
+      patch[f.key] = v
+    } else {
+      const csv = normalizeCodes(raw)
+      if (csv === '' && !window.confirm('邀请码留空将开放注册（任何人无需邀请码即可注册），确定继续？')) {
+        return
+      }
+      patch[f.key] = csv
     }
-    patch[f.key] = v
   }
   saving.value = true
   try {
@@ -79,6 +97,11 @@ async function save() {
   } finally {
     saving.value = false
   }
+}
+
+// normalizeCodes 逗号/空白/换行分隔 → 去空去重的 CSV（与后端 parseInviteCodes 一致）。
+function normalizeCodes(raw: string): string {
+  return [...new Set(raw.split(/[\s,]+/).filter(Boolean))].join(',')
 }
 </script>
 
@@ -100,7 +123,8 @@ async function save() {
             </span>
           </label>
           <p class="form-hint">{{ f.hint }}</p>
-          <input :id="f.key" v-model="inputs[f.key]" type="number" min="1" step="1" />
+          <textarea v-if="f.type === 'text'" :id="f.key" v-model="inputs[f.key]" rows="3" />
+          <input v-else :id="f.key" v-model="inputs[f.key]" type="number" min="1" step="1" />
         </div>
         <div class="btn-row">
           <button :disabled="saving" @click="save">{{ saving ? '保存中…' : '保存' }}</button>
